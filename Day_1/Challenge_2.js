@@ -1,0 +1,53 @@
+import { AocClient } from "advent-of-code-client";
+import { argv } from "node:process";
+
+if (argv[2] === undefined || argv.length > 3) {
+    throw new Error('Error! Token was not passed in or too many arguments were given!');
+}
+
+  const client = new AocClient({
+      year: 2024,
+     day: 1,
+     token: argv[2]
+});
+
+const puzzleIn = await client.getInput();
+
+const numberPairs = puzzleIn.split('\n');
+let locationIDs1 = [];
+let locationIDs2 = [];
+
+for (const numberPair of numberPairs) {
+    const numberPairArr = numberPair.split('   ');
+    if (numberPairArr[0] === '') continue;
+    locationIDs1.push(numberPairArr[0]);
+    locationIDs2.push(numberPairArr[1]);
+}
+
+let similarity = 0;
+for (let i = 0; i < 1000; i++) {
+    const list1ID = locationIDs1[i];
+    let list1IDoccurances = 0;
+    for (const list2ID of locationIDs2) {
+        if (list1ID === list2ID) list1IDoccurances++
+    }
+    locationIDs1[i] = list1ID * list1IDoccurances;
+}
+
+for (const id of locationIDs1) {
+    similarity += id;
+}
+
+console.log(`Possible solution found: ${similarity}. Submitting to AoC...`);
+try {
+    const success = await client.submit(2, similarity);
+    if (success) {
+        console.log(`Success! We found the correct answer!`);
+    } else {
+        console.log(`Bzzt! That wasn't it... There's a bug somewhere in the code...`);
+    }
+} catch(e) {
+    if (e.message === "You don't seem to be solving the correct level. Did you already complete it?") console.log("Either you have already completed this challenge or cannot complete it yet.");
+    else throw e;
+}
+process.exit();
